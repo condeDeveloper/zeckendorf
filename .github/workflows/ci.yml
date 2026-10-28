@@ -1,0 +1,44 @@
+name: testes
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  testes:
+    runs-on: ${{ matrix.so }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        so: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      # A unicidade de Zeckendorf NAO e assumida: para cada numero ate 400 a
+      # varredura monta TODAS as somas de Fibonaccis distintos e conta quantas
+      # nao tem vizinhos. E o Nim de Fibonacci e resolvido por minimax, que nao
+      # conhece a regra; a regra so aparece na coluna que confere.
+      - name: testes
+        run: dotnet test testes/Zeckendorf.Testes/Zeckendorf.Testes.csproj -c Release --nologo -v q
+
+      - name: os primeiros numeros, com todas as somas
+        run: dotnet run --project ferramentas/Medidor/Medidor.csproj -c Release -- numeros
+
+      - name: a unicidade contada
+        run: dotnet run --project ferramentas/Medidor/Medidor.csproj -c Release -- unicidade
+
+      - name: quantas somas existem ao todo
+        run: dotnet run --project ferramentas/Medidor/Medidor.csproj -c Release -- crescimento
+
+      - name: o Nim de Fibonacci por minimax
+        run: dotnet run --project ferramentas/Medidor/Medidor.csproj -c Release -- jogo
+
+      - name: a ponte entre as duas metades
+        run: dotnet run --project ferramentas/Medidor/Medidor.csproj -c Release -- ponte
